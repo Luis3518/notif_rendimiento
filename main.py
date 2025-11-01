@@ -1,0 +1,196 @@
+"""
+Sistema de Gestión de Tenencias de Inversión
+Monitorea y calcula rendimientos de cartera (acciones, CEDEARs, crypto)
+"""
+import json
+import logging
+import os
+import sys
+from typing import Dict, List, Tuple
+
+from dotenv import load_dotenv
+
+from api_client import APIClient
+from calculator import PortfolioCalculator
+from report import ReportGenerator
+
+# Cargar variables de entorno
+load_dotenv()
+TENENCIAS_FILE = os.getenv("TENENCIAS_FILE", "tenencias.json")
+
+# Configurar logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+
+def load_tenencias() -> Tuple[List[Dict], List[Dict], List[Dict]]:
+    """
+    Carga el archivo tenencias.json
+    
+    Returns:
+        Tupla con (lista_acciones, lista_cedears, lista_crypto)
+    
+    Raises:
+        FileNotFoundError: Si no encuentra el archivo
+        json.JSONDecodeError: Si el JSON es inválido
+        KeyError: Si falta alguna estructura esperada
+    """
+    try:
+        logger.info(f"Cargando archivo {TENENCIAS_FILE}")
+        with open(TENENCIAS_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        acciones = data.get("acciones", [])
+        cedears = data.get("cedears", [])
+        crypto = data.get("crypto", [])
+        
+        logger.info(f"Cargadas: {len(acciones)} acciones, {len(cedears)} CEDEARs, {len(crypto)} crypto")
+        
+        # Validar estructura básica
+        for asset in acciones + cedears + crypto:
+            if not all(k in asset for k in ["ticker", "cantidad", "preciototalcompra"]):
+                raise ValueError(f"Activo inválido: {asset}")
+        
+        return acciones, cedears, crypto
+    
+    except FileNotFoundError:
+        logger.error(f"Archivo {TENENCIAS_FILE} no encontrado")
+        raise
+    except json.JSONDecodeError as e:
+        logger.error(f"Error al parsear JSON: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Error al cargar tenencias: {e}")
+        raise
+
+
+def process_portfolio():
+    """Función principal que procesa toda la cartera"""
+    
+    try:
+        # 1. Cargar tenencias
+        acciones_data, cedears_data, crypto_data = load_tenencias()
+        
+        # 2. Inicializar cliente de API
+        api_client = APIClient()
+        
+        # 3. Obtener cotización del dólar MEP
+        logger.info("Obteniendo cotización del dólar MEP...")
+        dolar_mep = api_client.get_dolar_mep()
+        
+        if not dolar_mep:
+            logger.error("No se pudo obtener cotización del dólar MEP. Abortando.")
+            return False
+        
+        # 4. Obtener cotizaciones de acciones
+        acciones_prices = {}
+        if acciones_data:
+            logger.info("Obteniendo cotizaciones de acciones...")
+            tickers_acciones = [a["ticker"] for a in acciones_data]
+            acciones_prices = api_client.get_acciones_prices(tickers_acciones)
+        
+        # 5. Obtener cotizaciones de CEDEARs
+        cedears_prices = {}
+        if cedears_data:
+            logger.info("Obteniendo cotizaciones de CEDEARs...")
+            tickers_cedears = [c["ticker"] for c in cedears_data]
+            cedears_prices = api_client.get_cedears_prices(tickers_cedears)
+        
+        # 6. Inicializar calculadora
+        calculator = PortfolioCalculator(dolar_mep)
+        
+        # 7. Procesar acciones
+        acciones_procesadas = []
+        for accion in acciones_data:
+            ticker = accion["ticker"]
+            if ticker in acciones_prices:
+                resultado = calculator.calculate_asset_performance(
+                    ticker=ticker,
+                    categoria="acciones",
+                    cantidad=accion["cantidad"],
+                    precio_compra_total_usd=accion["preciototalcompra"],
+                    precio_actual_unitario=acciones_prices[ticker],
+                    is_ars=True  # Las acciones están en ARS
+                )
+                acciones_procesadas.append(resultado)
+            else:
+                logger.warning(f"No se pudo obtener precio para acción: {ticker}")
+        
+        # 8. Procesar CEDEARs
+        cedears_procesados = []
+        for cedear in cedears_data:
+            ticker = cedear["ticker"]
+            if ticker in cedears_prices:
+                resultado = calculator.calculate_asset_performance(
+                    ticker=ticker,
+                    categoria="cedears",
+                    cantidad=cedear["cantidad"],
+                    precio_compra_total_usd=cedear["preciototalcompra"],
+                    precio_actual_unitario=cedears_prices[ticker],
+                    is_ars=False  # Los CEDEARs están en USD
+                )
+                cedears_procesados.append(resultado)
+            else:
+                logger.warning(f"No se pudo obtener precio para CEDEAR: {ticker}")
+        
+        # 9. Procesar crypto (sin cotizaciones por ahora, placeholder)
+        crypto_procesados = []
+        for cripto in crypto_data:
+            logger.info(f"Crypto {cripto['ticker']}: No implementado aún (sin API)")
+        
+        # 10. Calcular totales por categoría
+        totals_acciones = calculator.calculate_category_totals(acciones_procesadas)
+        totals_cedears = calculator.calculate_category_totals(cedears_procesados)
+        totals_crypto = calculator.calculate_category_totals(crypto_procesados)
+        
+        # 11. Calcular totales consolidados
+        todos_activos = acciones_procesadas + cedears_procesados + crypto_procesados
+        totals_portfolio = calculator.calculate_portfolio_totals(todos_activos)
+        
+        # 12. Generar reporte
+        report = ReportGenerator()
+        report.generate_full_report(
+            acciones=acciones_procesadas,
+            cedears=cedears_procesados,
+            crypto=crypto_procesados,
+            totals_acciones=totals_acciones,
+            totals_cedears=totals_cedears,
+            totals_crypto=totals_crypto,
+            totals_portfolio=totals_portfolio,
+            dolar_mep=dolar_mep
+        )
+        
+        return True
+    
+    except FileNotFoundError:
+        logger.error(f"Error: No se encontró el archivo {TENENCIAS_FILE}")
+        return False
+    except json.JSONDecodeError:
+        logger.error("Error: El archivo JSON tiene formato inválido")
+        return False
+    except Exception as e:
+        logger.error(f"Error inesperado: {e}", exc_info=True)
+        return False
+
+
+def main():
+    """Punto de entrada del programa"""
+    logger.info("=" * 60)
+    logger.info("Sistema de Gestión de Tenencias de Inversión")
+    logger.info("=" * 60)
+    
+    success = process_portfolio()
+    
+    if success:
+        logger.info("Proceso completado exitosamente")
+        sys.exit(0)
+    else:
+        logger.error("El proceso finalizó con errores")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
