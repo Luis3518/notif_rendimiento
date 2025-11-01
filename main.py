@@ -97,8 +97,31 @@ def load_tenencias() -> Tuple[List[Dict], List[Dict], List[Dict]]:
         raise
 
 
-def process_portfolio():
-    """Función principal que procesa toda la cartera"""
+def check_high_performance(todos_activos: List[Dict], threshold: float = 40.0) -> bool:
+    """
+    Verifica si algún activo supera el umbral de rendimiento
+    
+    Args:
+        todos_activos: Lista con todos los activos procesados
+        threshold: Umbral de rendimiento en porcentaje (default: 40%)
+    
+    Returns:
+        True si algún activo supera el umbral, False en caso contrario
+    """
+    for activo in todos_activos:
+        if activo['rendimiento_porcentaje'] > threshold:
+            logger.info(f"Activo {activo['ticker']} supera el umbral: {activo['rendimiento_porcentaje']:.2f}% > {threshold}%")
+            return True
+    return False
+
+
+def process_portfolio(force_notification: bool = False):
+    """
+    Función principal que procesa toda la cartera
+    
+    Args:
+        force_notification: Si es True, fuerza el envío de notificación
+    """
     
     try:
         # 1. Cargar tenencias
@@ -197,21 +220,34 @@ def process_portfolio():
             dolar_mep_fecha=dolar_mep_fecha
         )
         
-        # 13. Enviar notificación de Telegram
-        logger.info("Enviando notificación de Telegram...")
-        telegram = TelegramNotifier()
-        if telegram.enabled:
-            message = telegram.format_portfolio_message(
-                dolar_mep=dolar_mep,
-                dolar_mep_fecha=dolar_mep_fecha,
-                acciones=acciones_procesadas,
-                cedears=cedears_procesados,
-                crypto=crypto_procesados,
-                totals_portfolio=totals_portfolio
-            )
-            telegram.send_message(message)
+        # 13. Determinar si se debe enviar notificación
+        should_notify = False
+        
+        if force_notification:
+            logger.info("Notificación forzada por argumento de línea de comandos")
+            should_notify = True
+        elif check_high_performance(todos_activos, threshold=40.0):
+            logger.info("Notificación activada: al menos un activo supera el 40% de rendimiento")
+            should_notify = True
         else:
-            logger.info("Notificación de Telegram deshabilitada (configurar TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID)")
+            logger.info("No se envía notificación: ningún activo supera el 40% y no se forzó el envío")
+        
+        # 14. Enviar notificación de Telegram solo si corresponde
+        if should_notify:
+            logger.info("Enviando notificación de Telegram...")
+            telegram = TelegramNotifier()
+            if telegram.enabled:
+                message = telegram.format_portfolio_message(
+                    dolar_mep=dolar_mep,
+                    dolar_mep_fecha=dolar_mep_fecha,
+                    acciones=acciones_procesadas,
+                    cedears=cedears_procesados,
+                    crypto=crypto_procesados,
+                    totals_portfolio=totals_portfolio
+                )
+                telegram.send_message(message)
+            else:
+                logger.info("Notificación de Telegram deshabilitada (configurar TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID)")
         
         return True
     
@@ -232,7 +268,13 @@ def main():
     logger.info("Sistema de Gestión de Tenencias de Inversión")
     logger.info("=" * 60)
     
-    success = process_portfolio()
+    # Verificar si se pasó el argumento --notify
+    force_notification = "--notify" in sys.argv or "-n" in sys.argv
+    
+    if force_notification:
+        logger.info("Argumento de notificación detectado: se enviará notificación de Telegram")
+    
+    success = process_portfolio(force_notification=force_notification)
     
     if success:
         logger.info("Proceso completado exitosamente")

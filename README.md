@@ -111,7 +111,7 @@ Estructura del archivo `tenencias.json`:
 
 ## ▶️ Uso
 
-Ejecutar el sistema:
+### Ejecución Normal
 
 ```bash
 python main.py
@@ -123,6 +123,36 @@ El sistema automáticamente:
 3. Obtendrá precios actuales de acciones y CEDEARs
 4. Calculará rendimientos y conversiones
 5. Mostrará un reporte detallado en consola
+
+### 📱 Comportamiento de Notificaciones
+
+Por defecto, las notificaciones de Telegram **NO se envían automáticamente**. Solo se envían cuando:
+
+1. **Se fuerza el envío con un argumento:**
+   ```bash
+   python main.py --notify
+   # O usando la versión corta:
+   python main.py -n
+   ```
+
+2. **Algún activo supera el 40% de rendimiento positivo:**
+   - El sistema detecta automáticamente si algún activo tiene más del 40% de ganancia
+   - En ese caso, se enviará la notificación sin necesidad de usar `--notify`
+   - Verás en los logs: *"Notificación activada: al menos un activo supera el 40% de rendimiento"*
+
+**Ejemplos:**
+```bash
+# Ejecución normal - Solo notifica si hay activo > 40%
+python main.py
+
+# Forzar notificación siempre
+python main.py --notify
+
+# También funciona con -n
+python main.py -n
+```
+
+> **Nota**: Si las variables `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` no están configuradas, el sistema funcionará normalmente pero no intentará enviar notificaciones.
 
 ## 📈 Ejemplo de Salida
 
