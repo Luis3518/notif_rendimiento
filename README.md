@@ -126,44 +126,169 @@ El sistema automáticamente:
 
 ### 📱 Comportamiento de Notificaciones
 
-Por defecto, las notificaciones de Telegram **NO se envían automáticamente**. Solo se envían cuando:
+El sistema cuenta con un sistema de notificaciones inteligente que **NO envía notificaciones por defecto**. Solo se activan en escenarios específicos.
 
-1. **Se fuerza el envío con un argumento:**
-   ```bash
-   python main.py --notify
-   # O usando la versión corta:
-   python main.py -n
-   ```
+#### 🎯 Escenarios de Notificación
 
-2. **Se fuerza el envío con un mensaje personalizado:**
-   ```bash
-   python main.py --notify "Reporte Semanal"
-   # O usando la versión corta:
-   python main.py -n "Cierre del Mes"
-   ```
-   El mensaje personalizado reemplazará el título "Resumen de Cartera" en la notificación.
-
-3. **Algún activo supera el 40% de rendimiento positivo:**
-   - El sistema detecta automáticamente si algún activo tiene más del 40% de ganancia
-   - En ese caso, se enviará la notificación sin necesidad de usar `--notify`
-   - Verás en los logs: *"Notificación activada: al menos un activo supera el 40% de rendimiento"*
-
-**Ejemplos:**
+##### **1️⃣ Modo Sin Notificación (Uso Normal)**
 ```bash
-# Ejecución normal - Solo notifica si hay activo > 40%
 python main.py
+```
+- ✅ Ejecuta el análisis completo de la cartera
+- ✅ Muestra el reporte en consola
+- ✅ Genera logs de ejecución
+- ❌ **NO envía notificación de Telegram**
+- ⚠️ **EXCEPCIÓN:** Se activa automáticamente si algún activo supera el 40% de rendimiento
 
-# Forzar notificación siempre
-python main.py --notify
+**Caso de uso:** Ejecuciones programadas (cron/Task Scheduler) para monitoreo silencioso diario.
 
-# Forzar notificación con título personalizado
-python main.py --notify "Resumen Mensual de Octubre"
+---
 
-# También funciona con -n
-python main.py -n "Alerta de Rendimiento"
+##### **2️⃣ Notificación Automática por Alto Rendimiento**
+```bash
+python main.py  # Sin argumentos
+```
+- 🔔 Se activa **automáticamente** cuando algún activo supera el **40% de ganancia**
+- 📧 Envía un **mensaje especial de alerta** con:
+  - Header de emergencia: "🚨🔥 ¡ALERTA DE ALTO RENDIMIENTO! 🔥🚨"
+  - Información del/los activos que superaron el umbral
+  - **Cálculo de estrategia de recuperación:**
+    - Cuántos activos vender para recuperar inversión
+    - Cuántos activos quedan "gratis"
+    - Valor de los activos restantes
+  - Mensaje motivacional: "⏰ ¡Hora de recuperar inversión! 💸✨"
+
+**Logs indicadores:**
+```
+INFO - Notificación activada: al menos un activo supera el 40% de rendimiento
 ```
 
-> **Nota**: Si las variables `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` no están configuradas, el sistema funcionará normalmente pero no intentará enviar notificaciones.
+**Caso de uso:** Alertas de oportunidad para tomar ganancias cuando un activo tiene rendimiento excepcional.
+
+**Ejemplo de mensaje:**
+```
+🚨🔥 ¡ALERTA DE ALTO RENDIMIENTO! 🔥🚨
+
+💎 Activo AAPL superó el 40%
+📈 Rendimiento actual: +45.30%
+💰 Ganancia: $3,850.50 USD
+
+━━━━━━━━━━━━━━━━━━━
+💡 Estrategia de Recuperación:
+📤 Vende 35 AAPL → Recuperas $8,500.00 USD
+🎁 Te quedan 15 AAPL GRATIS
+💵 Valor restante: $3,637.50 USD
+━━━━━━━━━━━━━━━━━━━
+💵 Dólar MEP: $1,495.20
+📅 Actualizado: 01/11/2025 18:00
+━━━━━━━━━━━━━━━━━━━
+
+⏰ ¡Hora de recuperar inversión! 💸✨
+```
+
+---
+
+##### **3️⃣ Notificación Forzada (Sin Título Personalizado)**
+```bash
+python main.py --notify
+# O versión corta:
+python main.py -n
+```
+- 🔔 Envía notificación **siempre**, independientemente del rendimiento
+- 📧 Mensaje de **resumen completo** de cartera con:
+  - Título predeterminado: "📊 Resumen de Cartera"
+  - Cotización del dólar MEP
+  - Detalle de rendimiento por activo (acciones, CEDEARs, crypto)
+  - Sin cálculos de recuperación de inversión
+
+**Logs indicadores:**
+```
+INFO - Argumento de notificación detectado: se enviará notificación de Telegram
+```
+
+**Caso de uso:** Reportes manuales, verificaciones puntuales, informes semanales/mensuales regulares.
+
+**Ejemplo de mensaje:**
+```
+📊 Resumen de Cartera
+
+💵 Dólar MEP: $1,495.20
+📅 Actualizado: 01/11/2025 18:00
+
+━━━━━━━━━━━━━━━━━━━
+🇦🇷 ACCIONES
+🟢 YPFD: +28.94%
+
+🌎 CEDEARS
+🟢 AAPL: +15.23%
+🔴 TSLA: -5.42%
+━━━━━━━━━━━━━━━━━━━
+```
+
+---
+
+##### **4️⃣ Notificación Forzada con Título Personalizado**
+```bash
+python main.py --notify "Reporte Semanal"
+# O versión corta:
+python main.py -n "Cierre del Mes"
+```
+- 🔔 Envía notificación **siempre**
+- 📧 Mensaje de **resumen completo** de cartera
+- 🎨 **Reemplaza** el título "Resumen de Cartera" por tu mensaje personalizado
+- ✨ Permite usar emojis en el título
+
+**Logs indicadores:**
+```
+INFO - Argumento de notificación detectado: se enviará notificación de Telegram
+INFO - Título personalizado detectado: 'Reporte Semanal'
+```
+
+**Caso de uso:** Reportes programados con contexto específico (diario, semanal, mensual, eventos especiales).
+
+**Ejemplos de uso:**
+```bash
+python main.py -n "📅 Reporte Semanal"
+python main.py -n "Cierre de Octubre 2025"
+python main.py -n "🎯 Revisión Trimestral"
+python main.py --notify "⚠️ Pre-Apertura de Mercados"
+```
+
+**Ejemplo de mensaje:**
+```
+📊 Reporte Semanal
+
+💵 Dólar MEP: $1,495.20
+📅 Actualizado: 01/11/2025 18:00
+
+━━━━━━━━━━━━━━━━━━━
+🇦🇷 ACCIONES
+🟢 YPFD: +28.94%
+
+🌎 CEDEARS
+🟢 AAPL: +15.23%
+🔴 TSLA: -5.42%
+━━━━━━━━━━━━━━━━━━━
+```
+
+---
+
+#### 📋 Tabla Resumen de Escenarios
+
+| Comando | Notificación | Tipo de Mensaje | Cuándo Usar |
+|---------|--------------|-----------------|-------------|
+| `python main.py` | ❌ No (excepto activo > 40%) | Alerta especial | Monitoreo automático diario |
+| `python main.py` (con activo > 40%) | ✅ Sí (automática) | Alerta de alto rendimiento | Detectado por el sistema |
+| `python main.py --notify` | ✅ Sí (forzada) | Resumen estándar | Reporte manual rápido |
+| `python main.py -n "Título"` | ✅ Sí (forzada) | Resumen personalizado | Reporte contextualizado |
+
+---
+
+#### ⚙️ Configuración Requerida
+
+> **Nota**: Si las variables `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` no están configuradas en el archivo `.env`, el sistema funcionará normalmente pero no intentará enviar notificaciones (se mostrará una advertencia en los logs).
+
+---
 
 ## 📈 Ejemplo de Salida
 
@@ -245,9 +370,20 @@ Para recibir notificaciones automáticas del rendimiento de tu cartera:
    
 Si las variables no están configuradas, el sistema funcionará normalmente pero sin enviar notificaciones.
 
-**Ejemplo de mensaje de Telegram:**
 
-*Mensaje normal (con --notify):*
+### Arquitectura del Sistema
+
+El sistema está dividido en módulos especializados:
+
+- **main.py**: Orquestador principal, coordina el flujo de ejecución y carga configuración desde `.env`
+- **api_client.py**: Cliente HTTP con reintentos automáticos para las APIs, carga su configuración desde `.env`
+- **calculator.py**: Motor de cálculos de rendimiento y conversiones ARS/USD
+- **report.py**: Generador de reportes visuales con colores
+- **telegram_notifier.py**: Gestor de notificaciones con mensajes inteligentes
+
+### Fórmulas de Cálculo
+
+**Conversión ARS → USD:**
 ```
 📊 Resumen de Cartera
 
@@ -316,33 +452,10 @@ Si las variables no están configuradas, el sistema funcionará normalmente pero
 �💵 Dólar MEP: $1,495.20
 📅 Actualizado: 01/11/2025 18:00
 ━━━━━━━━━━━━━━━━━━━
-
 ⏰ ¡Hora de recuperar inversión! 💸✨
 ```
 
-
-### Arquitectura del Sistema
-
-El sistema está dividido en módulos especializados:
-
-- **main.py**: Orquestador principal, coordina el flujo de ejecución y carga configuración desde `.env`
-- **api_client.py**: Cliente HTTP con reintentos automáticos para las APIs, carga su configuración desde `.env`
-- **calculator.py**: Motor de cálculos de rendimiento y conversiones ARS/USD
-- **report.py**: Generador de reportes visuales con colores
-
-### Fórmulas de Cálculo
-
-**Conversión ARS → USD:**
-```
-valor_usd = valor_ars / cotizacion_dolar_mep
-```
-
-**Rendimiento Porcentual:**
-```
-rendimiento = ((valor_actual - precio_compra) / precio_compra) × 100
-```
-
-## � Sistema de Logs
+## 📊 Sistema de Logs
 
 El sistema genera automáticamente archivos de log detallados en la carpeta `logs/` para cada ejecución:
 
