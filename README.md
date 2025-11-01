@@ -135,7 +135,15 @@ Por defecto, las notificaciones de Telegram **NO se envían automáticamente**. 
    python main.py -n
    ```
 
-2. **Algún activo supera el 40% de rendimiento positivo:**
+2. **Se fuerza el envío con un mensaje personalizado:**
+   ```bash
+   python main.py --notify "Reporte Semanal"
+   # O usando la versión corta:
+   python main.py -n "Cierre del Mes"
+   ```
+   El mensaje personalizado reemplazará el título "Resumen de Cartera" en la notificación.
+
+3. **Algún activo supera el 40% de rendimiento positivo:**
    - El sistema detecta automáticamente si algún activo tiene más del 40% de ganancia
    - En ese caso, se enviará la notificación sin necesidad de usar `--notify`
    - Verás en los logs: *"Notificación activada: al menos un activo supera el 40% de rendimiento"*
@@ -148,8 +156,11 @@ python main.py
 # Forzar notificación siempre
 python main.py --notify
 
+# Forzar notificación con título personalizado
+python main.py --notify "Resumen Mensual de Octubre"
+
 # También funciona con -n
-python main.py -n
+python main.py -n "Alerta de Rendimiento"
 ```
 
 > **Nota**: Si las variables `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` no están configuradas, el sistema funcionará normalmente pero no intentará enviar notificaciones.
@@ -242,11 +253,21 @@ Si las variables no están configuradas, el sistema funcionará normalmente pero
 📅 Actualizado: 01/11/2025 18:00
 
 ━━━━━━━━━━━━━━━━━━━
-📈 RESUMEN TOTAL
-Invertido: $12,114.32
-Actual: $13,284.75
-🟢 G/P: $1,170.43
-📈 Rendimiento: +9.66%
+🇦🇷 ACCIONES
+🟢 YPFD: +28.94%
+
+🌎 CEDEARS
+🟢 AAPL: +15.23%
+🔴 TSLA: -5.42%
+━━━━━━━━━━━━━━━━━━━
+```
+
+**Con título personalizado:**
+```
+📊 Reporte Semanal
+
+💵 Dólar MEP: $1,495.20
+📅 Actualizado: 01/11/2025 18:00
 
 ━━━━━━━━━━━━━━━━━━━
 🇦🇷 ACCIONES

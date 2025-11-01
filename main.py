@@ -115,12 +115,13 @@ def check_high_performance(todos_activos: List[Dict], threshold: float = 40.0) -
     return False
 
 
-def process_portfolio(force_notification: bool = False):
+def process_portfolio(force_notification: bool = False, custom_title: str = None):
     """
     Función principal que procesa toda la cartera
     
     Args:
         force_notification: Si es True, fuerza el envío de notificación
+        custom_title: Título personalizado para la notificación de Telegram
     """
     
     try:
@@ -243,7 +244,8 @@ def process_portfolio(force_notification: bool = False):
                     acciones=acciones_procesadas,
                     cedears=cedears_procesados,
                     crypto=crypto_procesados,
-                    totals_portfolio=totals_portfolio
+                    totals_portfolio=totals_portfolio,
+                    custom_title=custom_title
                 )
                 telegram.send_message(message)
             else:
@@ -268,13 +270,24 @@ def main():
     logger.info("Sistema de Gestión de Tenencias de Inversión")
     logger.info("=" * 60)
     
-    # Verificar si se pasó el argumento --notify
-    force_notification = "--notify" in sys.argv or "-n" in sys.argv
+    # Verificar si se pasó el argumento --notify o -n
+    force_notification = False
+    custom_title = None
+    
+    # Buscar --notify o -n en los argumentos
+    for i, arg in enumerate(sys.argv):
+        if arg in ["--notify", "-n"]:
+            force_notification = True
+            # Si hay un argumento siguiente y no empieza con -, es el mensaje
+            if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith("-"):
+                custom_title = sys.argv[i + 1]
+                logger.info(f"Título personalizado detectado: '{custom_title}'")
+            break
     
     if force_notification:
         logger.info("Argumento de notificación detectado: se enviará notificación de Telegram")
     
-    success = process_portfolio(force_notification=force_notification)
+    success = process_portfolio(force_notification=force_notification, custom_title=custom_title)
     
     if success:
         logger.info("Proceso completado exitosamente")

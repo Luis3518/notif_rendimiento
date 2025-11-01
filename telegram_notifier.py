@@ -68,7 +68,8 @@ class TelegramNotifier:
         acciones: List[Dict],
         cedears: List[Dict],
         crypto: List[Dict],
-        totals_portfolio: Dict
+        totals_portfolio: Dict,
+        custom_title: str = None
     ) -> str:
         """
         Formatea el mensaje de resumen de cartera para Telegram
@@ -80,6 +81,7 @@ class TelegramNotifier:
             cedears: Lista de activos de CEDEARs
             crypto: Lista de activos de crypto
             totals_portfolio: Totales consolidados
+            custom_title: Título personalizado (opcional, reemplaza "Resumen de Cartera")
             
         Returns:
             Mensaje formateado en HTML para Telegram
@@ -95,7 +97,13 @@ class TelegramNotifier:
         
         # Construir mensaje
         lines = []
-        lines.append("📊 <b>Resumen de Cartera</b>\n")
+        
+        # Usar título personalizado si está disponible, sino usar el predeterminado
+        if custom_title:
+            lines.append(f"📊 <b>{custom_title}</b>\n")
+        else:
+            lines.append("📊 <b>Resumen de Cartera</b>\n")
+        
         lines.append(f"💵 <b>Dólar MEP:</b> ${dolar_mep:.2f}")
         lines.append(f"📅 <b>Actualizado:</b> {fecha_formateada}\n")
         
