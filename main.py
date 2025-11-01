@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 from api_client import APIClient
 from calculator import PortfolioCalculator
 from report import ReportGenerator
+from telegram_notifier import TelegramNotifier
 
 # Cargar variables de entorno
 load_dotenv()
@@ -195,6 +196,22 @@ def process_portfolio():
             dolar_mep=dolar_mep,
             dolar_mep_fecha=dolar_mep_fecha
         )
+        
+        # 13. Enviar notificación de Telegram
+        logger.info("Enviando notificación de Telegram...")
+        telegram = TelegramNotifier()
+        if telegram.enabled:
+            message = telegram.format_portfolio_message(
+                dolar_mep=dolar_mep,
+                dolar_mep_fecha=dolar_mep_fecha,
+                acciones=acciones_procesadas,
+                cedears=cedears_procesados,
+                crypto=crypto_procesados,
+                totals_portfolio=totals_portfolio
+            )
+            telegram.send_message(message)
+        else:
+            logger.info("Notificación de Telegram deshabilitada (configurar TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID)")
         
         return True
     

@@ -11,6 +11,7 @@ Sistema Python que monitorea y calcula rendimientos de una cartera de inversione
 - ✅ Manejo robusto de errores con reintentos automáticos
 - ✅ Logging detallado de todas las operaciones
 - ✅ Configuración mediante variables de entorno
+- ✅ Notificaciones automáticas via Telegram
 - 🚧 Soporte para criptomonedas (en desarrollo)
 
 ## 📋 Requisitos
@@ -163,6 +164,7 @@ YPFD (ACCIONES)
 
 Puedes personalizar el comportamiento del sistema creando un archivo `.env`:
 
+**APIs y Configuración:**
 - `API_ACCIONES`: URL de la API de acciones
 - `API_CEDEARS`: URL de la API de CEDEARs
 - `API_DOLAR`: URL de la API del dólar
@@ -170,6 +172,61 @@ Puedes personalizar el comportamiento del sistema creando un archivo `.env`:
 - `MAX_RETRIES`: Número máximo de reintentos en peticiones (default: 3)
 - `TIMEOUT`: Timeout en segundos para peticiones HTTP (default: 10)
 - `DOLAR_CASA`: Casa de cambio para dólar MEP (default: bolsa)
+
+**Notificaciones de Telegram (opcional):**
+- `TELEGRAM_BOT_TOKEN`: Token del bot de Telegram (obtener de @BotFather)
+- `TELEGRAM_CHAT_ID`: ID del chat/usuario donde enviar notificaciones
+
+#### 📱 Configurar Notificaciones de Telegram
+
+Para recibir notificaciones automáticas del rendimiento de tu cartera:
+
+1. **Crear un bot de Telegram:**
+   - Abre Telegram y busca [@BotFather](https://t.me/botfather)
+   - Envía `/newbot` y sigue las instrucciones
+   - Copia el token que te proporciona (ej: `123456789:ABCdefGHIjklMNOpqrsTUVwxyz`)
+
+2. **Obtener tu Chat ID:**
+   - Envía un mensaje a tu bot
+   - Abre en tu navegador: `https://api.telegram.org/bot<TU_TOKEN>/getUpdates`
+   - Busca el campo `"chat":{"id":` y copia ese número (ej: `987654321`)
+
+3. **Configurar variables de entorno:**
+   ```env
+   TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
+   TELEGRAM_CHAT_ID=987654321
+   ```
+
+4. **Probar el sistema:**
+   ```bash
+   python main.py
+   ```
+   
+Si las variables no están configuradas, el sistema funcionará normalmente pero sin enviar notificaciones.
+
+**Ejemplo de mensaje de Telegram:**
+```
+📊 Resumen de Cartera
+
+💵 Dólar MEP: $1,495.20
+📅 Actualizado: 01/11/2025 18:00
+
+━━━━━━━━━━━━━━━━━━━
+📈 RESUMEN TOTAL
+Invertido: $12,114.32
+Actual: $13,284.75
+🟢 G/P: $1,170.43
+📈 Rendimiento: +9.66%
+
+━━━━━━━━━━━━━━━━━━━
+🇦🇷 ACCIONES
+🟢 YPFD: +28.94%
+
+🌎 CEDEARS
+🟢 AAPL: +15.23%
+🔴 TSLA: -5.42%
+━━━━━━━━━━━━━━━━━━━
+```
 
 
 ### Arquitectura del Sistema
