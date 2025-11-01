@@ -138,3 +138,90 @@ class TelegramNotifier:
         lines.append("━━━━━━━━━━━━━━━━━━━")
         
         return "\n".join(lines)
+    
+    def format_high_performance_alert(
+        self,
+        high_performance_assets: List[Dict],
+        dolar_mep: float,
+        dolar_mep_fecha: str
+    ) -> str:
+        """
+        Formatea un mensaje de alerta especial cuando activos superan el 40%
+        
+        Args:
+            high_performance_assets: Lista de activos que superan el 40%
+            dolar_mep: Cotización del dólar MEP
+            dolar_mep_fecha: Fecha de actualización del MEP
+            
+        Returns:
+            Mensaje formateado en HTML para Telegram
+        """
+        from datetime import datetime
+        import math
+        
+        # Formatear la fecha
+        try:
+            fecha_dt = datetime.fromisoformat(dolar_mep_fecha.replace('Z', '+00:00'))
+            fecha_formateada = fecha_dt.strftime("%d/%m/%Y %H:%M")
+        except:
+            fecha_formateada = dolar_mep_fecha
+        
+        lines = []
+        
+        # Header de alerta
+        lines.append("🚨🔥 <b>¡ALERTA DE ALTO RENDIMIENTO!</b> 🔥🚨\n")
+        
+        # Información de los activos que superan el umbral
+        if len(high_performance_assets) == 1:
+            asset = high_performance_assets[0]
+            lines.append(f"💎 <b>Activo {asset['ticker']}</b> superó el 40%")
+            lines.append(f"📈 <b>Rendimiento actual:</b> +{asset['rendimiento_porcentaje']:.2f}%")
+            lines.append(f"💰 <b>Ganancia:</b> ${asset['ganancia_perdida_usd']:.2f} USD")
+            
+            # Calcular cuántos activos vender para recuperar inversión
+            precio_compra_total = asset['precio_compra_total_usd']
+            precio_actual_unitario = asset['precio_actual_unitario_usd']
+            cantidad_total = asset['cantidad']
+            
+            # Cantidad necesaria para recuperar inversión inicial
+            cantidad_a_vender = math.ceil(precio_compra_total / precio_actual_unitario)
+            
+            # Asegurarse de no vender más de lo que se tiene
+            if cantidad_a_vender <= cantidad_total:
+                cantidad_restante = cantidad_total - cantidad_a_vender
+                valor_vendido = cantidad_a_vender * precio_actual_unitario
+                
+                lines.append("")
+                lines.append("━━━━━━━━━━━━━━━━━━━")
+                lines.append("💡 <b>Estrategia de Recuperación:</b>")
+                lines.append(f"📈 <b>Vende {cantidad_a_vender}</b> {asset['ticker']} → Recuperas ${valor_vendido:.2f} USD")
+                lines.append(f"🎁 <b>Te quedan {cantidad_restante}</b> {asset['ticker']} <b>GRATIS</b>")
+            else:
+                lines.append("")
+                lines.append("━━━━━━━━━━━━━━━━━━━")
+                lines.append("💡 <b>Estrategia de Recuperación:</b>")
+                lines.append(f"📤 <b>Vende todo</b> ({cantidad_total} {asset['ticker']}) para maximizar ganancia")
+        else:
+            lines.append(f"��� <b>{len(high_performance_assets)} activos</b> superaron el 40%\n")
+            for asset in high_performance_assets:
+                precio_compra_total = asset['precio_compra_total_usd']
+                precio_actual_unitario = asset['precio_actual_unitario_usd']
+                cantidad_total = asset['cantidad']
+                
+                cantidad_a_vender = math.ceil(precio_compra_total / precio_actual_unitario)
+                
+                if cantidad_a_vender <= cantidad_total:
+                    cantidad_restante = cantidad_total - cantidad_a_vender
+                    lines.append(f"🔸 <b>{asset['ticker']}:</b> +{asset['rendimiento_porcentaje']:.2f}% → Vende {cantidad_a_vender}, quedan {cantidad_restante} gratis")
+                else:
+                    lines.append(f"🔸 <b>{asset['ticker']}:</b> +{asset['rendimiento_porcentaje']:.2f}%")
+        
+        lines.append("")
+        lines.append("━━━━━━━━━━━━━━━━━━━")
+        lines.append(f"💵 <b>Dólar MEP:</b> ${dolar_mep:.2f}")
+        lines.append(f"📅 <b>Actualizado:</b> {fecha_formateada}")
+        lines.append("━━━━━━━━━━━━━━━━━━━")
+        lines.append("")
+        lines.append("⏰ <b>¡Hora de recuperar inversión!</b> 💸✨")
+        
+        return "\n".join(lines)

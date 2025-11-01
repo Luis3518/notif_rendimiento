@@ -246,6 +246,8 @@ Para recibir notificaciones automáticas del rendimiento de tu cartera:
 Si las variables no están configuradas, el sistema funcionará normalmente pero sin enviar notificaciones.
 
 **Ejemplo de mensaje de Telegram:**
+
+*Mensaje normal (con --notify):*
 ```
 📊 Resumen de Cartera
 
@@ -262,7 +264,7 @@ Si las variables no están configuradas, el sistema funcionará normalmente pero
 ━━━━━━━━━━━━━━━━━━━
 ```
 
-**Con título personalizado:**
+*Con título personalizado:*
 ```
 📊 Reporte Semanal
 
@@ -277,6 +279,45 @@ Si las variables no están configuradas, el sistema funcionará normalmente pero
 🟢 AAPL: +15.23%
 🔴 TSLA: -5.42%
 ━━━━━━━━━━━━━━━━━━━
+```
+
+*Mensaje de alerta automática (activo > 40%):*
+```
+🚨🔥 ¡ALERTA DE ALTO RENDIMIENTO! 🔥🚨
+
+💎 Activo AAPL superó el 40%
+📈 Rendimiento actual: +45.30%
+💰 Ganancia: $3,850.50 USD
+
+━━━━━━━━━━━━━━━━━━━
+� Estrategia de Recuperación:
+📤 Vende 35 AAPL → Recuperas $8,500.00 USD
+🎁 Te quedan 15 AAPL GRATIS
+💵 Valor restante: $3,637.50 USD
+━━━━━━━━━━━━━━━━━━━
+💵 Dólar MEP: $1,495.20
+📅 Actualizado: 01/11/2025 18:00
+━━━━━━━━━━━━━━━━━━━
+
+⏰ ¡Hora de recuperar inversión! 💸✨
+```
+
+*Cuando múltiples activos superan el 40%:*
+```
+🚨🔥 ¡ALERTA DE ALTO RENDIMIENTO! 🔥🚨
+
+💎 3 activos superaron el 40%
+
+🔸 AAPL: +45.30% → Vende 35, quedan 15 gratis
+🔸 TSLA: +52.10% → Vende 20, quedan 12 gratis
+🔸 NVDA: +48.75% → Vende 28, quedan 18 gratis
+
+━━━━━━━━━━━━━━━━━━━
+�💵 Dólar MEP: $1,495.20
+📅 Actualizado: 01/11/2025 18:00
+━━━━━━━━━━━━━━━━━━━
+
+⏰ ¡Hora de recuperar inversión! 💸✨
 ```
 
 

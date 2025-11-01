@@ -97,7 +97,7 @@ def load_tenencias() -> Tuple[List[Dict], List[Dict], List[Dict]]:
         raise
 
 
-def check_high_performance(todos_activos: List[Dict], threshold: float = 40.0) -> bool:
+def check_high_performance(todos_activos: List[Dict], threshold: float = 40.0) -> Tuple[bool, List[Dict]]:
     """
     Verifica si algún activo supera el umbral de rendimiento
     
@@ -106,13 +106,16 @@ def check_high_performance(todos_activos: List[Dict], threshold: float = 40.0) -
         threshold: Umbral de rendimiento en porcentaje (default: 40%)
     
     Returns:
-        True si algún activo supera el umbral, False en caso contrario
+        Tupla (bool, lista): (True si algún activo supera el umbral, lista de activos que superan)
     """
+    activos_superan = []
+    
     for activo in todos_activos:
         if activo['rendimiento_porcentaje'] > threshold:
             logger.info(f"Activo {activo['ticker']} supera el umbral: {activo['rendimiento_porcentaje']:.2f}% > {threshold}%")
-            return True
-    return False
+            activos_superan.append(activo)
+    
+    return len(activos_superan) > 0, activos_superan
 
 
 def process_portfolio(force_notification: bool = False, custom_title: str = None):
@@ -223,30 +226,45 @@ def process_portfolio(force_notification: bool = False, custom_title: str = None
         
         # 13. Determinar si se debe enviar notificación
         should_notify = False
+        high_performance_triggered = False
+        high_performance_assets = []
         
         if force_notification:
             logger.info("Notificación forzada por argumento de línea de comandos")
             should_notify = True
-        elif check_high_performance(todos_activos, threshold=40.0):
-            logger.info("Notificación activada: al menos un activo supera el 40% de rendimiento")
-            should_notify = True
         else:
-            logger.info("No se envía notificación: ningún activo supera el 40% y no se forzó el envío")
+            has_high_perf, high_perf_assets = check_high_performance(todos_activos, threshold=40.0)
+            if has_high_perf:
+                logger.info("Notificación activada: al menos un activo supera el 40% de rendimiento")
+                should_notify = True
+                high_performance_triggered = True
+                high_performance_assets = high_perf_assets
+            else:
+                logger.info("No se envía notificación: ningún activo supera el 40% y no se forzó el envío")
         
         # 14. Enviar notificación de Telegram solo si corresponde
         if should_notify:
             logger.info("Enviando notificación de Telegram...")
             telegram = TelegramNotifier()
             if telegram.enabled:
-                message = telegram.format_portfolio_message(
-                    dolar_mep=dolar_mep,
-                    dolar_mep_fecha=dolar_mep_fecha,
-                    acciones=acciones_procesadas,
-                    cedears=cedears_procesados,
-                    crypto=crypto_procesados,
-                    totals_portfolio=totals_portfolio,
-                    custom_title=custom_title
-                )
+                # Si se activó por rendimiento alto, usar mensaje especial
+                if high_performance_triggered:
+                    message = telegram.format_high_performance_alert(
+                        high_performance_assets=high_performance_assets,
+                        dolar_mep=dolar_mep,
+                        dolar_mep_fecha=dolar_mep_fecha
+                    )
+                else:
+                    # Mensaje normal para notificaciones forzadas
+                    message = telegram.format_portfolio_message(
+                        dolar_mep=dolar_mep,
+                        dolar_mep_fecha=dolar_mep_fecha,
+                        acciones=acciones_procesadas,
+                        cedears=cedears_procesados,
+                        crypto=crypto_procesados,
+                        totals_portfolio=totals_portfolio,
+                        custom_title=custom_title
+                    )
                 telegram.send_message(message)
             else:
                 logger.info("Notificación de Telegram deshabilitada (configurar TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID)")
