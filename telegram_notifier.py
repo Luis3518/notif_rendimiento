@@ -115,12 +115,14 @@ class TelegramNotifier:
         Returns:
             Mensaje formateado en HTML para Telegram
         """
-        from datetime import datetime
+        from datetime import datetime, timedelta
         
-        # Formatear la fecha
+        # Formatear la fecha y ajustar a hora de Argentina (UTC-3)
         try:
             fecha_dt = datetime.fromisoformat(dolar_mep_fecha.replace('Z', '+00:00'))
-            fecha_formateada = fecha_dt.strftime("%d/%m/%Y %H:%M")
+            # Restar 3 horas para convertir de UTC a hora de Argentina
+            fecha_dt_argentina = fecha_dt - timedelta(hours=3)
+            fecha_formateada = fecha_dt_argentina.strftime("%d/%m/%Y %H:%M")
         except:
             fecha_formateada = dolar_mep_fecha
         
@@ -185,13 +187,15 @@ class TelegramNotifier:
         Returns:
             Mensaje formateado en HTML para Telegram
         """
-        from datetime import datetime
+        from datetime import datetime, timedelta
         import math
         
-        # Formatear la fecha
+        # Formatear la fecha y ajustar a hora de Argentina (UTC-3)
         try:
             fecha_dt = datetime.fromisoformat(dolar_mep_fecha.replace('Z', '+00:00'))
-            fecha_formateada = fecha_dt.strftime("%d/%m/%Y %H:%M")
+            # Restar 3 horas para convertir de UTC a hora de Argentina
+            fecha_dt_argentina = fecha_dt - timedelta(hours=3)
+            fecha_formateada = fecha_dt_argentina.strftime("%d/%m/%Y %H:%M")
         except:
             fecha_formateada = dolar_mep_fecha
         

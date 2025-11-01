@@ -111,10 +111,13 @@ class ReportGenerator:
         
         self.print_header("REPORTE DE RENDIMIENTO DE CARTERA")
         
-        # Formatear la fecha
+        # Formatear la fecha y ajustar a hora de Argentina (UTC-3)
         try:
+            from datetime import timedelta
             fecha_dt = datetime.fromisoformat(dolar_mep_fecha.replace('Z', '+00:00'))
-            fecha_formateada = fecha_dt.strftime("%d/%m/%Y %H:%M")
+            # Restar 3 horas para convertir de UTC a hora de Argentina
+            fecha_dt_argentina = fecha_dt - timedelta(hours=3)
+            fecha_formateada = fecha_dt_argentina.strftime("%d/%m/%Y %H:%M")
         except:
             fecha_formateada = dolar_mep_fecha
         
