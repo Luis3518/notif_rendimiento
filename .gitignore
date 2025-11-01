@@ -39,6 +39,9 @@ Thumbs.db
 
 # Logs
 *.log
+logs/*.log
+logs/execution_*.log
+logs/errors_*.log
 
 # Reportes generados
 reporte_*.txt

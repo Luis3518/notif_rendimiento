@@ -19,7 +19,6 @@ DOLAR_CASA = os.getenv("DOLAR_CASA", "bolsa")
 MAX_RETRIES = int(os.getenv("MAX_RETRIES", "3"))
 TIMEOUT = int(os.getenv("TIMEOUT", "10"))
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

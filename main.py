@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import sys
+from datetime import datetime
 from typing import Dict, List, Tuple
 
 from dotenv import load_dotenv
@@ -18,11 +19,39 @@ from report import ReportGenerator
 load_dotenv()
 TENENCIAS_FILE = os.getenv("TENENCIAS_FILE", "tenencias.json")
 
-# Configurar logging
+# Crear carpeta de logs si no existe
+LOGS_DIR = "logs"
+os.makedirs(LOGS_DIR, exist_ok=True)
+
+# Configurar logging con archivos separados por timestamp
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+log_file_all = os.path.join(LOGS_DIR, f"execution_{timestamp}.log")
+log_file_errors = os.path.join(LOGS_DIR, f"errors_{timestamp}.log")
+
+# Configurar el formato de logging
+log_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# Handler para todos los logs (INFO y superior)
+file_handler_all = logging.FileHandler(log_file_all, encoding='utf-8')
+file_handler_all.setLevel(logging.INFO)
+file_handler_all.setFormatter(log_format)
+
+# Handler para solo errores (ERROR y superior)
+file_handler_errors = logging.FileHandler(log_file_errors, encoding='utf-8')
+file_handler_errors.setLevel(logging.ERROR)
+file_handler_errors.setFormatter(log_format)
+
+# Handler para consola
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_handler.setFormatter(log_format)
+
+# Configurar el logger raíz
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    handlers=[file_handler_all, file_handler_errors, console_handler]
 )
+
 logger = logging.getLogger(__name__)
 
 

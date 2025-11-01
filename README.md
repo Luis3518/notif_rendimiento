@@ -193,23 +193,81 @@ valor_usd = valor_ars / cotizacion_dolar_mep
 rendimiento = ((valor_actual - precio_compra) / precio_compra) × 100
 ```
 
-## 🐛 Resolución de Problemas
+## � Sistema de Logs
+
+El sistema genera automáticamente archivos de log detallados en la carpeta `logs/` para cada ejecución:
+
+### Archivos Generados
+
+Cada ejecución crea dos archivos con timestamp único en formato `YYYYMMDD_HHMMSS`:
+
+1. **`execution_YYYYMMDD_HHMMSS.log`**
+   - Contiene todos los logs (INFO, WARNING, ERROR)
+   - Útil para auditar el flujo completo de ejecución
+   - Incluye: consultas a APIs, cálculos realizados, warnings, etc.
+
+2. **`errors_YYYYMMDD_HHMMSS.log`**
+   - Contiene únicamente logs de ERROR y CRITICAL
+   - Permite identificar problemas rápidamente
+   - Estará vacío en ejecuciones exitosas sin errores
+
+### Ejemplo de Nombres
+
+```
+logs/
+├── execution_20251101_175958.log  # Ejecución del 1/nov/2025 a las 17:59:58
+├── errors_20251101_175958.log     # Errores de esa misma ejecución
+├── execution_20251101_180430.log  # Segunda ejecución
+└── errors_20251101_180430.log     # (vacío si no hubo errores)
+```
+
+### Características
+
+- ✅ Los logs también se muestran en consola en tiempo real
+- ✅ Formato: `timestamp - módulo - nivel - mensaje`
+- ✅ Encoding UTF-8 para caracteres especiales
+- ✅ La carpeta `logs/` está en `.gitignore` (no se versiona)
+- ✅ Creación automática de la carpeta si no existe
+
+### Ejemplo de Contenido
+
+```log
+2025-11-01 17:59:58,768 - __main__ - INFO - Cargando archivo ../shared-data/tenencias.json
+2025-11-01 17:59:58,769 - __main__ - INFO - Cargadas: 1 acciones, 4 CEDEARs, 0 crypto
+2025-11-01 17:59:59,757 - api_client - INFO - Dólar MEP (bolsa/venta): $1495.2
+2025-11-01 18:00:01,079 - api_client - WARNING - No se encontró cotización para CEDEAR: EMM
+2025-11-01 18:00:01,089 - __main__ - INFO - Proceso completado exitosamente
+```
+
+## �🐛 Resolución de Problemas
 
 **Error: No se encuentra tenencias.json**
 - Verifica que el archivo existe en el mismo directorio que main.py
+- Revisa los logs en `logs/errors_*.log` para más detalles
 
 **Error: No se puede conectar a las APIs**
 - Verifica tu conexión a Internet
 - Las APIs pueden estar temporalmente no disponibles
 - Considera aumentar `TIMEOUT` en `.env`
+- Consulta `logs/errors_*.log` para ver el error específico
 
 **Error: Ticker no encontrado**
 - Verifica que el símbolo del ticker sea correcto
 - Algunos activos pueden no estar disponibles en las APIs
+- El sistema registra un WARNING en los logs
 
 **Error: ModuleNotFoundError**
 ```bash
 pip install -r requirements.txt
+```
+
+**Revisar logs de ejecuciones anteriores**
+```bash
+# Ver último archivo de ejecución
+type logs\execution_*.log | Select-Object -Last 1
+
+# Ver últimos errores
+type logs\errors_*.log | Select-Object -Last 1
 ```
 
 ## 📄 Licencia
