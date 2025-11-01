@@ -61,6 +61,35 @@ class TelegramNotifier:
             logger.error(f"Error al enviar mensaje de Telegram: {e}")
             return False
     
+    def _get_performance_emoji(self, rendimiento: float) -> str:
+        """
+        Determina el emoji según el rendimiento porcentual
+        
+        Args:
+            rendimiento: Porcentaje de rendimiento
+            
+        Returns:
+            Emoji correspondiente al rango de rendimiento
+        """
+        if rendimiento <= -80:
+            return "☠"
+        elif rendimiento <= -51:
+            return "💀"
+        elif rendimiento <= -16:
+            return "🔴"
+        elif rendimiento < 0:
+            return "🟠"
+        elif rendimiento <= 9:
+            return "🟡"
+        elif rendimiento <= 39:
+            return "🟢"
+        elif rendimiento <= 59:
+            return "🤑"
+        elif rendimiento <= 99:
+            return "💰"
+        else:  # >= 100%
+            return "💎"
+    
     def format_portfolio_message(
         self,
         dolar_mep: float,
@@ -113,7 +142,7 @@ class TelegramNotifier:
             lines.append("<b>🇦🇷 ACCIONES</b>")
             for asset in acciones:
                 rend = asset['rendimiento_porcentaje']
-                emoji = "🟢" if rend >= 0 else "🔴"
+                emoji = self._get_performance_emoji(rend)
                 sign = "+" if rend >= 0 else ""
                 lines.append(f"{emoji} <b>{asset['ticker']}</b>: {sign}{rend:.2f}%")
         
@@ -122,7 +151,7 @@ class TelegramNotifier:
             lines.append("\n<b>🌎 CEDEARS</b>")
             for asset in cedears:
                 rend = asset['rendimiento_porcentaje']
-                emoji = "🟢" if rend >= 0 else "🔴"
+                emoji = self._get_performance_emoji(rend)
                 sign = "+" if rend >= 0 else ""
                 lines.append(f"{emoji} <b>{asset['ticker']}</b>: {sign}{rend:.2f}%")
         
@@ -131,7 +160,7 @@ class TelegramNotifier:
             lines.append("\n<b>₿ CRYPTO</b>")
             for asset in crypto:
                 rend = asset['rendimiento_porcentaje']
-                emoji = "🟢" if rend >= 0 else "🔴"
+                emoji = self._get_performance_emoji(rend)
                 sign = "+" if rend >= 0 else ""
                 lines.append(f"{emoji} <b>{asset['ticker']}</b>: {sign}{rend:.2f}%")
         
@@ -220,8 +249,5 @@ class TelegramNotifier:
         lines.append("━━━━━━━━━━━━━━━━━━━")
         lines.append(f"💵 <b>Dólar MEP:</b> ${dolar_mep:.2f}")
         lines.append(f"📅 <b>Actualizado:</b> {fecha_formateada}")
-        lines.append("━━━━━━━━━━━━━━━━━━━")
-        lines.append("")
-        lines.append("⏰ <b>¡Hora de recuperar inversión!</b> 💸✨")
-        
+        lines.append("━━━━━━━━━━━━━━━━━━━")        
         return "\n".join(lines)
