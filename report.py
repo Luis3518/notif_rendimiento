@@ -121,7 +121,7 @@ class ReportGenerator:
         # CEDEARS
         if cedears:
             print(f"\n{Fore.BLUE}{Style.BRIGHT}{'═' * 100}{Style.RESET_ALL}")
-            print(f"{Fore.BLUE}{Style.BRIGHT}CEDEARS (USD){Style.RESET_ALL}")
+            print(f"{Fore.BLUE}{Style.BRIGHT}CEDEARS (ARS → USD){Style.RESET_ALL}")
             print(f"{Fore.BLUE}{Style.BRIGHT}{'═' * 100}{Style.RESET_ALL}\n")
             for asset in cedears:
                 self.print_asset_details(asset)

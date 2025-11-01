@@ -102,7 +102,7 @@ class APIClient:
     
     def get_cedears_prices(self, tickers: List[str]) -> Dict[str, float]:
         """
-        Obtiene precios de CEDEARs (en USD)
+        Obtiene precios de CEDEARs (en ARS, igual que las acciones)
         Retorna dict {ticker: px_ask}
         """
         data = self._get_with_retry(API_CEDEARS)

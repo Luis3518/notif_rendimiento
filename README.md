@@ -105,8 +105,8 @@ Estructura del archivo `tenencias.json`:
 **Importante**: 
 - `preciototalcompra` debe estar en USD para todas las categorías
 - Los tickers deben coincidir con los símbolos de las APIs
-- Los valores en `tenencias.json` son de ejemplo. Ajústalos según tu cartera real.
-- Los precios de CEDEARs pueden mostrar valores muy altos si la API retorna valores en escala diferente
+- Los valores en `tenencias.json` son de ejemplo. Ajústalos según tu cartera real
+- Tanto acciones como CEDEARs cotizan en ARS y se convierten automáticamente a USD
 
 ## ▶️ Uso
 
@@ -137,22 +137,25 @@ ACCIONES ARGENTINAS (ARS → USD)
 ════════════════════════════════════════════════════════════════════
 
 YPFD (ACCIONES)
-  Cantidad:              100
-  Precio compra (unit):  $35.00
+  Cantidad:              4
+  Precio compra (unit):  $28.58
   Precio actual (unit):  $36.85
-  Valor actual (total):  $3,685.00
-  Ganancia/Pérdida:      +$185.00
-  Rendimiento:           +5.29%
-```
+  Valor actual (total):  $147.41
+  Ganancia/Pérdida:      +$33.09
+  Rendimiento:           +28.94%
+  Precio ARS:            $55100.00 (MEP: $1495.20)
+
 
 ## 🔌 APIs Utilizadas
 
-- **Acciones argentinas**: https://data912.com/live/arg_stocks
-- **CEDEARs**: https://data912.com/live/arg_cedears
-- **Dólar MEP**: https://dolarapi.com/v1/dolares
+- **Acciones argentinas**: https://data912.com/live/arg_stocks (cotizaciones en ARS)
+- **CEDEARs**: https://data912.com/live/arg_cedears (cotizaciones en ARS)
+- **Dólar MEP**: https://dolarapi.com/v1/dolares (conversión ARS → USD)
 - **Criptomonedas**: 🚧 En desarrollo - Próximamente se agregará integración con APIs de crypto
 
-> **Nota**: La funcionalidad de criptomonedas está actualmente en desarrollo. Puedes incluir crypto en tu archivo `tenencias.json`, pero los precios no se obtendrán automáticamente hasta que se integre una API de cotizaciones.
+> **Nota sobre conversión**: Tanto las acciones como los CEDEARs cotizan en pesos argentinos (ARS). El sistema convierte automáticamente todos los valores a dólares (USD) usando la cotización del dólar MEP (casa bolsa) para facilitar la comparación y análisis.
+
+> **Nota sobre crypto**: La funcionalidad de criptomonedas está actualmente en desarrollo. Puedes incluir crypto en tu archivo `tenencias.json`, pero los precios no se obtendrán automáticamente hasta que se integre una API de cotizaciones.
 
 ## ⚙️ Configuración Avanzada
 

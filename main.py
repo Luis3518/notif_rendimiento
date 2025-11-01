@@ -130,7 +130,7 @@ def process_portfolio():
                     cantidad=cedear["cantidad"],
                     precio_compra_total_usd=cedear["preciototalcompra"],
                     precio_actual_unitario=cedears_prices[ticker],
-                    is_ars=False  # Los CEDEARs están en USD
+                    is_ars=True  # Los CEDEARs también cotizan en ARS
                 )
                 cedears_procesados.append(resultado)
             else:
