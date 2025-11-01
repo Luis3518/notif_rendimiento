@@ -47,8 +47,13 @@ class APIClient:
                 return None
         return None
     
-    def get_dolar_mep(self) -> Optional[float]:
-        """Obtiene la cotización del dólar MEP (casa bolsa, venta)"""
+    def get_dolar_mep(self) -> Optional[Dict]:
+        """
+        Obtiene la cotización del dólar MEP (casa bolsa, venta)
+        
+        Returns:
+            Dict con 'venta' y 'fechaActualizacion', o None si hay error
+        """
         data = self._get_with_retry(API_DOLAR)
         
         if not data:
@@ -60,8 +65,12 @@ class APIClient:
             for item in data:
                 if item.get("casa") == DOLAR_CASA:
                     venta = item.get("venta")
-                    logger.info(f"Dólar MEP (bolsa/venta): ${venta}")
-                    return float(venta)
+                    fecha_actualizacion = item.get("fechaActualizacion")
+                    logger.info(f"Dólar MEP (bolsa/venta): ${venta} - Actualizado: {fecha_actualizacion}")
+                    return {
+                        "venta": float(venta),
+                        "fechaActualizacion": fecha_actualizacion
+                    }
             
             logger.error(f"No se encontró la casa '{DOLAR_CASA}' en la respuesta")
             return None

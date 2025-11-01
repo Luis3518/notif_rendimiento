@@ -90,7 +90,8 @@ class ReportGenerator:
         totals_cedears: Dict,
         totals_crypto: Dict,
         totals_portfolio: Dict,
-        dolar_mep: float
+        dolar_mep: float,
+        dolar_mep_fecha: str
     ):
         """
         Genera el reporte completo de la cartera
@@ -104,10 +105,21 @@ class ReportGenerator:
             totals_crypto: Totales de crypto
             totals_portfolio: Totales consolidados
             dolar_mep: Cotización del dólar MEP utilizada
+            dolar_mep_fecha: Fecha de actualización del dólar MEP
         """
+        from datetime import datetime
+        
         self.print_header("REPORTE DE RENDIMIENTO DE CARTERA")
         
-        print(f"{Fore.CYAN}Dólar MEP (Bolsa): {Style.BRIGHT}${dolar_mep:.2f}{Style.RESET_ALL}\n")
+        # Formatear la fecha
+        try:
+            fecha_dt = datetime.fromisoformat(dolar_mep_fecha.replace('Z', '+00:00'))
+            fecha_formateada = fecha_dt.strftime("%d/%m/%Y %H:%M")
+        except:
+            fecha_formateada = dolar_mep_fecha
+        
+        print(f"{Fore.CYAN}Dólar MEP (Bolsa): {Style.BRIGHT}${dolar_mep:.2f}{Style.RESET_ALL}")
+        print(f"{Fore.CYAN}Actualizado: {Style.BRIGHT}{fecha_formateada}{Style.RESET_ALL}\n")
         
         # ACCIONES
         if acciones:

@@ -79,11 +79,14 @@ def process_portfolio():
         
         # 3. Obtener cotización del dólar MEP
         logger.info("Obteniendo cotización del dólar MEP...")
-        dolar_mep = api_client.get_dolar_mep()
+        dolar_mep_data = api_client.get_dolar_mep()
         
-        if not dolar_mep:
+        if not dolar_mep_data:
             logger.error("No se pudo obtener cotización del dólar MEP. Abortando.")
             return False
+        
+        dolar_mep = dolar_mep_data["venta"]
+        dolar_mep_fecha = dolar_mep_data["fechaActualizacion"]
         
         # 4. Obtener cotizaciones de acciones
         acciones_prices = {}
@@ -160,7 +163,8 @@ def process_portfolio():
             totals_cedears=totals_cedears,
             totals_crypto=totals_crypto,
             totals_portfolio=totals_portfolio,
-            dolar_mep=dolar_mep
+            dolar_mep=dolar_mep,
+            dolar_mep_fecha=dolar_mep_fecha
         )
         
         return True
