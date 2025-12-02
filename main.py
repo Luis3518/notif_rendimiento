@@ -233,9 +233,9 @@ def process_portfolio(force_notification: bool = False, custom_title: str = None
             logger.info("Notificación forzada por argumento de línea de comandos")
             should_notify = True
         else:
-            has_high_perf, high_perf_assets = check_high_performance(todos_activos, threshold=40.0)
+            has_high_perf, high_perf_assets = check_high_performance(todos_activos, threshold=55.0)
             if has_high_perf:
-                logger.info("Notificación activada: al menos un activo supera el 40% de rendimiento")
+                logger.info("Notificación activada: al menos un activo supera el 55% de rendimiento")
                 should_notify = True
                 high_performance_triggered = True
                 high_performance_assets = high_perf_assets
